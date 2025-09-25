@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>太平庄项目应急物资仓库线上管理</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#0F3885',
+            accent: '#4080FF',
+            success: '#00B42A',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .calendar-day {
+        aspect-ratio: 1 / 1;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-blue-50 font-sans text-gray-800">
+  <!-- 顶部导航 -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- 小屏幕隐藏 logo，仅显示标题（便于单行展示，汉堡在右侧） -->
+        <img src="./wangye/logo.jpg" alt="中国建筑logo" class="hidden md:block h-10 w-auto mr-2">
+        <h1 class="text-lg md:text-xl font-bold text-primary">太平庄项目应急物资仓库线上管理</h1>
+      </div>
+      
+      <!-- 移动端菜单按钮 -->
+      <button id="menu-toggle" class="md:hidden text-gray-700 focus:outline-none">
+        <i class="fa fa-bars text-xl"></i>
+      </button>
+    </div>
+    
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+      <div class="container mx-auto px-4 py-2 flex flex-col space-y-1">
+        <button class="tab-button py-2 px-4 text-left rounded hover:bg-primary hover:text-white" data-tab="home">首页</button>
+        <button class="tab-button py-2 px-4 text-left rounded hover:bg-primary hover:text-white" data-tab="categories">物资类别</button>
+        <button class="tab-button py-2 px-4 text-left rounded hover:bg-primary hover:text-white" data-tab="inspection">定期检查</button>
+        <button class="tab-button py-2 px-4 text-left rounded hover:bg-primary hover:text-white" data-tab="usage">使用登记</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-6">
+    <!-- 桌面端选项卡导航 -->
+    <div class="hidden md:flex border-b border-gray-200 mb-6">
+      <button class="tab-button py-4 px-6 border-b-2 border-primary text-primary font-medium" data-tab="home">首页</button>
+      <button class="tab-button py-4 px-6 border-b-2 border-transparent hover:text-primary" data-tab="categories">物资类别</button>
+      <button class="tab-button py-4 px-6 border-b-2 border-transparent hover:text-primary" data-tab="inspection">定期检查</button>
+      <button class="tab-button py-4 px-6 border-b-2 border-transparent hover:text-primary" data-tab="usage">使用登记</button>
+    </div>
+
+    <!-- 首页内容 -->
+    <section id="tab-home" class="tab-content bg-white rounded-lg p-6 card-shadow mb-6">
+      <div class="mb-8">
+        <!-- 首页主图作为背景图，增加遮罩提高文字可读性 -->
+        <div class="relative rounded-lg overflow-hidden mb-4">
+          <!-- 背景图（通过 inline style 指定路径） -->
+          <div class="bg-center bg-cover h-56 md:h-72" style="background-image: url('./wangye/xmzp.png');"></div>
+          <!-- 渐变遮罩（从顶部更透明到底部更深） -->
+          <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/60"></div>
+          <!-- 覆盖文字内容 -->
+          <div class="absolute inset-0 flex flex-col justify-center items-start p-6">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">太平庄项目应急物资仓库线上管理</h2>
+            <p class="text-white/90">高效管理应急物资，确保在紧急情况下能够迅速响应</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-primary mb-2">物资管理</h3>
+          <p class="text-sm text-gray-600">全面分类管理各类应急物资，实时掌握库存状态</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-green-600 mb-2">定期检查</h3>
+          <p class="text-sm text-gray-600">系统化检查流程，确保所有物资处于良好可用状态</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-purple-600 mb-2">使用登记</h3>
+          <p class="text-sm text-gray-600">完整记录物资领取和归还情况，实现可追溯管理</p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+        <div>
+          <h3 class="font-semibold mb-3">物资类别统计</h3>
+          <canvas id="categoryChart" height="200"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 物资类别内容 -->
+    <section id="tab-categories" class="tab-content bg-white rounded-lg p-6 card-shadow mb-6 hidden">
+      <h2 class="text-xl font-bold mb-4">物资类别</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- 消防器材类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/xfsd.jpg" alt="消防器材" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">消防器材类</h3>
+            <p class="text-sm text-gray-600 mb-3">各类消防灭火设备和器材</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="fire">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 医疗急救类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/jsy.jpg" alt="医疗急救" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">医疗急救类</h3>
+            <p class="text-sm text-gray-600 mb-3">急救药品、医疗器械等</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="medical">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 防汛物资类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/fxsd.jpg" alt="防汛物资" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">防汛物资类</h3>
+            <p class="text-sm text-gray-600 mb-3">防汛沙袋、水泵等防汛设备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="flood">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 抢险工具类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/kyq.jpg" alt="抢险工具" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">抢险工具类</h3>
+            <p class="text-sm text-gray-600 mb-3">各类抢险救援工具设备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="tools">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 通讯设备类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/xc.jpg" alt="通讯设备" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">通讯设备类</h3>
+            <p class="text-sm text-gray-600 mb-3">对讲机、卫星电话等通讯设备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="communication">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 照明设备类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/zmd.jpg" alt="照明设备" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">照明设备类</h3>
+            <p class="text-sm text-gray-600 mb-3">应急照明灯、手电筒等照明设备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="lighting">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 防护装备类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/zys.jpg" alt="防护装备" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">防护装备类</h3>
+            <p class="text-sm text-gray-600 mb-3">安全帽、防护服等个人防护装备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="protection">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 应急救援类 -->
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          <img src="./wangye/mhq.png" alt="应急救援" class="w-full h-40 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold mb-2">应急救援类</h3>
+            <p class="text-sm text-gray-600 mb-3">担架、救生绳等救援设备</p>
+            <button class="view-category text-primary hover:text-secondary text-sm font-medium" data-category="rescue">
+              查看详情 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 定期检查内容 -->
+    <section id="tab-inspection" class="tab-content bg-white rounded-lg p-6 card-shadow mb-6 hidden">
+      <h2 class="text-xl font-bold mb-4">定期检查</h2>
+      
+      <!-- 日历 -->
+      <div class="bg-white rounded-lg border border-gray-200 mb-6">
+        <div class="bg-primary text-white p-4 flex justify-between items-center">
+          <button id="prev-month" class="hover:text-white/80 transition-colors">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          <h4 id="current-month" class="text-lg font-medium">2023年6月</h4>
+          <button id="next-month" class="hover:text-white/80 transition-colors">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        </div>
+        
+        <div class="p-4">
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <div class="text-center font-medium text-gray-500 py-2">日</div>
+            <div class="text-center font-medium text-gray-500 py-2">一</div>
+            <div class="text-center font-medium text-gray-500 py-2">二</div>
+            <div class="text-center font-medium text-gray-500 py-2">三</div>
+            <div class="text-center font-medium text-gray-500 py-2">四</div>
+            <div class="text-center font-medium text-gray-500 py-2">五</div>
+            <div class="text-center font-medium text-gray-500 py-2">六</div>
+          </div>
+          
+          <div id="calendar-days" class="grid grid-cols-7 gap-1">
+            <!-- 日历内容由JS生成 -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- 检查登记 -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold mb-4">检查登记</h3>
+        <form id="inspection-form" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">检查日期</label>
+              <input type="date" id="inspection-date" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">检查人员</label>
+              <input type="text" id="inspector" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入检查人员姓名" required>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">检查类别</label>
+            <select id="inspection-category" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+              <option value="">请选择检查类别</option>
+              <option value="daily">日常检查</option>
+              <option value="special">专项检查</option>
+              <option value="weekly">周检查</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">检查项目</label>
+            <select id="inspection-item" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+              <option value="">请先选择检查类别</option>
+              <option value="taipingzhuang">太平庄项目</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">是否通过检查</label>
+            <div class="flex space-x-4">
+              <label class="inline-flex items-center">
+                <input type="radio" name="inspection-result" value="yes" class="w-4 h-4 text-primary" required>
+                <span class="ml-2">是</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" name="inspection-result" value="no" class="w-4 h-4 text-primary">
+                <span class="ml-2">否</span>
+              </label>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">检查照片</label>
+            <input type="file" id="inspection-photo" class="w-full p-2 border border-gray-300 rounded-md" required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+            <textarea id="inspection-notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入检查情况备注" required></textarea>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              <i class="fa fa-save mr-2"></i> 保存检查记录
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 使用登记内容 -->
+    <section id="tab-usage" class="tab-content bg-white rounded-lg p-6 card-shadow mb-6 hidden">
+      <h2 class="text-xl font-bold mb-4">使用登记</h2>
+      
+      <!-- 使用登记选项卡 -->
+      <div class="border-b border-gray-200 mb-4">
+  <button class="usage-tab-button py-2 px-4 border-b-2 border-primary text-primary font-medium" data-subtab="usage-form">使用申请</button>
+        <button class="usage-tab-button py-2 px-4 border-b-2 border-transparent hover:text-primary" data-subtab="return-form">归还登记</button>
+        <button class="usage-tab-button py-2 px-4 border-b-2 border-transparent hover:text-primary" data-subtab="records">登记记录</button>
+      </div>
+      
+      <!-- 使用登记申请表 -->
+      <div id="usage-form" class="usage-tab-content">
+        <form class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">申请日期</label>
+              <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">使用单位</label>
+              <select class="w-full px-4 py-2 border border-gray-300 rounded-md usage-unit" required>
+                <option value="">请选择</option>
+                <option value="中基">中基</option>
+                <option value="皓海">皓海</option>
+                <option value="朋达">朋达</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">使用人</label>
+              <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入使用人姓名" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+              <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入联系电话" required>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">使用原因</label>
+            <textarea rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入使用原因" required></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">申请物资明细</label>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资类别</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资名称</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">规格型号</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">申请数量</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="usage-items" class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <select class="usage-category border-gray-300 rounded-md" required>
+                        <option value="">请选择</option>
+                        <option value="fire">消防器材类</option>
+                        <option value="medical">医疗急救类</option>
+                        <option value="flood">防汛物资类</option>
+                        <option value="tools">抢险工具类</option>
+                        <option value="communication">通讯设备类</option>
+                        <option value="lighting">照明设备类</option>
+                        <option value="protection">防护装备类</option>
+                        <option value="rescue">应急救援类</option>
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <select class="usage-item border-gray-300 rounded-md" disabled required>
+                        <option value="">请先选择类别</option>
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap usage-specification text-gray-500">-</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <input type="number" class="usage-quantity border-gray-300 rounded-md" min="1" value="1" required>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                      <button type="button" class="add-item text-primary hover:text-secondary">
+                        <i class="fa fa-plus-circle"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              <i class="fa fa-save mr-2"></i> 提交申请
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- 归还登记表 -->
+      <div id="return-form" class="usage-tab-content hidden">
+        <form class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">归还日期</label>
+              <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">归还人</label>
+              <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入归还人姓名" required>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">归还物资明细</label>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资类别</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资名称</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">规格型号</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">归还数量</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="return-items" class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <select class="return-category border-gray-300 rounded-md" required>
+                        <option value="">请选择</option>
+                        <option value="fire">消防器材类</option>
+                        <option value="medical">医疗急救类</option>
+                        <option value="flood">防汛物资类</option>
+                        <option value="tools">抢险工具类</option>
+                        <option value="communication">通讯设备类</option>
+                        <option value="lighting">照明设备类</option>
+                        <option value="protection">防护装备类</option>
+                        <option value="rescue">应急救援类</option>
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <select class="return-item border-gray-300 rounded-md" disabled required>
+                        <option value="">请先选择类别</option>
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap return-specification text-gray-500">-</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <input type="number" class="return-quantity border-gray-300 rounded-md" min="1" value="1" required>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <select class="return-status border-gray-300 rounded-md" required>
+                        <option value="good">完好</option>
+                        <option value="damaged">损坏</option>
+                        <option value="expired">过期</option>
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                      <button type="button" class="add-return-item text-primary hover:text-secondary">
+                        <i class="fa fa-plus-circle"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+            <textarea rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="请输入归还情况备注" required></textarea>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              <i class="fa fa-save mr-2"></i> 提交归还
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- 登记记录 -->
+      <div id="records" class="usage-tab-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">物资使用记录</h3>
+          <div class="flex space-x-2">
+            <input type="text" id="record-search" placeholder="搜索记录..." class="px-3 py-1 border border-gray-300 rounded-md">
+            <select id="record-filter" class="px-3 py-1 border border-gray-300 rounded-md">
+              <option value="all">全部记录</option>
+              <option value="usage">使用记录</option>
+              <option value="return">归还记录</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单位/人员</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资名称</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">2023-06-01</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-primary">物资借出</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">工程一部</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">灭火器</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">2</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-yellow-500">已借出</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">2023-06-03</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600">物资归还</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">工程一部</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">灭火器</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">2</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-green-500">已归还</td>
+              </tr>
+              <!-- 更多记录 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-white py-6">
+    <div class="container mx-auto px-4 text-center text-sm">
+      <p>© 2025 太平庄项目应急物资仓库线上管理系统. 保留所有权利.</p>
+    </div>
+  </footer>
+
+  <!-- 物资详情模态框 -->
+  <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-auto">
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+        <h3 id="modal-title" class="text-xl font-bold">物资详情</h3>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fa fa-times text-xl"></i>
+        </button>
+      </div>
+      <div id="modal-content" class="p-6">
+        <!-- 动态填充 -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // 物资数据
+  const 物资Data = {
+      fire: {
+        name: '消防器材类',
+        items: [
+          { id: 'fire-extinguisher', name: '灭火器', specification: 'ABC干粉 4kg', quantity: 20, location: '仓库A区1号架' },
+          { id: 'fire-hose', name: '消防水带', specification: 'DN65 20m', quantity: 10, location: '仓库A区2号架' },
+          { id: 'fire-hydrant', name: '室内消火栓', specification: 'DN65', quantity: 5, location: '仓库A区3号架' }
+        ]
+      },
+      medical: {
+        name: '医疗急救类',
+        items: [
+          { id: 'first-aid-kit', name: '急救箱', specification: '标准型', quantity: 12, location: '仓库B区1号架' },
+          { id: 'stretcher', name: '担架', specification: '折叠式', quantity: 6, location: '仓库B区2号架' }
+        ]
+      },
+      flood: {
+        name: '防汛物资类',
+        items: [
+          { id: 'sandbag', name: '防汛沙袋', specification: '50×80cm', quantity: 200, location: '仓库C区1号架' },
+          { id: 'water-pump', name: '抽水泵', specification: '2寸 3kW', quantity: 8, location: '仓库C区2号架' }
+        ]
+      },
+      tools: {
+        name: '抢险工具类',
+        items: [
+          { id: 'jackhammer', name: '冲击钻', specification: '1100W', quantity: 4, location: '仓库D区1号架' },
+          { id: 'cutting-machine', name: '切割机', specification: '180mm', quantity: 3, location: '仓库D区2号架' }
+        ]
+      },
+      communication: {
+        name: '通讯设备类',
+        items: [
+          { id: 'walkie-talkie', name: '对讲机', specification: '5km', quantity: 15, location: '仓库E区1号架' },
+          { id: 'satellite-phone', name: '卫星电话', specification: 'Iridium', quantity: 2, location: '仓库E区2号架' }
+        ]
+      },
+      lighting: {
+        name: '照明设备类',
+        items: [
+          { id: 'emergency-light', name: '应急照明灯', specification: 'LED 20W', quantity: 25, location: '仓库F区1号架' },
+          { id: 'searchlight', name: '探照灯', specification: 'LED 50W', quantity: 10, location: '仓库F区2号架' }
+        ]
+      },
+      protection: {
+        name: '防护装备类',
+        items: [
+          { id: 'safety-helmet', name: '安全帽', specification: 'ABS', quantity: 100, location: '仓库G区1号架' },
+          { id: 'safety-shoes', name: '安全鞋', specification: '防砸防刺', quantity: 80, location: '仓库G区2号架' }
+        ]
+      },
+      rescue: {
+        name: '应急救援类',
+        items: [
+          { id: 'rescue-rope', name: '救援绳', specification: '10mm×50m', quantity: 8, location: '仓库H区1号架' },
+          { id: 'rescue-ladder', name: '救援梯', specification: '6m', quantity: 4, location: '仓库H区2号架' }
+        ]
+      }
+    };
+
+    // 选项卡切换
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const tab = this.getAttribute('data-tab');
+        
+        // 隐藏所有内容
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.add('hidden');
+        });
+        
+        // 显示选中内容
+        document.getElementById('tab-' + tab).classList.remove('hidden');
+        
+        // 更新桌面端选项卡样式
+        document.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('border-primary', 'text-primary');
+          btn.classList.add('border-transparent');
+        });
+        this.classList.add('border-primary', 'text-primary');
+      });
+    });
+
+    // 使用登记子选项卡切换
+    document.querySelectorAll('.usage-tab-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const subtab = this.getAttribute('data-subtab');
+        
+        // 隐藏所有子内容
+        document.querySelectorAll('.usage-tab-content').forEach(content => {
+          content.classList.add('hidden');
+        });
+        
+        // 显示选中子内容
+        document.getElementById(subtab).classList.remove('hidden');
+        
+        // 更新子选项卡样式
+        document.querySelectorAll('.usage-tab-button').forEach(btn => {
+          btn.classList.remove('border-primary', 'text-primary');
+          btn.classList.add('border-transparent');
+        });
+        this.classList.add('border-primary', 'text-primary');
+      });
+    });
+
+    // 移动端菜单切换
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // imageMap 将从外部 JSON 加载，以便按需更新（见 wangye/images.json）
+    let imageMap = {};
+
+    function initCategoryHandlers() {
+      document.querySelectorAll('.view-category').forEach(button => {
+        button.addEventListener('click', function() {
+          const categoryId = this.getAttribute('data-category');
+          const category = 物资Data[categoryId] || { name: categoryId, items: [] };
+          const catImg = (imageMap.categories && imageMap.categories[categoryId]) || './wangye/logo.jpg';
+
+          let content = `
+            <div class="mb-4 flex items-start space-x-4">
+              <img src="${catImg}" alt="${category.name}" class="w-28 h-20 object-cover rounded-md">
+              <div>
+                <h3 class="text-lg font-bold mb-1">${category.name}</h3>
+                <p class="text-sm text-gray-600">共 ${category.items.length} 项物资</p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">图片</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物资名称</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">规格型号</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量</th>
+                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">位置</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+          `;
+
+          category.items.forEach(item => {
+            const itemImg = (imageMap.items && imageMap.items[item.id]) || catImg;
+            content += `
+              <tr>
+                <td class="px-3 py-2 whitespace-nowrap"><img src="${itemImg}" alt="${item.name}" class="w-16 h-12 object-cover rounded"></td>
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">${item.name}</td>
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">${item.specification}</td>
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">${item.location}</td>
+              </tr>
+            `;
+          });
+
+          content += `
+                </tbody>
+              </table>
+            </div>
+          `;
+
+          document.getElementById('modal-content').innerHTML = content;
+          document.getElementById('item-modal').classList.remove('hidden');
+        });
+      });
+    }
+
+    // 从外部 JSON 加载映射，便于按文件夹自动更新（可由脚本生成 images.json）
+    fetch('./wangye/images.json')
+      .then(res => res.json())
+      .then(data => {
+        imageMap = data || {};
+        initCategoryHandlers();
+      })
+      .catch(err => {
+        console.warn('无法加载 ./wangye/images.json，使用内置映射。', err);
+        imageMap = {
+          categories: {
+            fire: './wangye/xfsd.jpg',
+            medical: './wangye/jsy.jpg',
+            flood: './wangye/fxsd.jpg',
+            tools: './wangye/kyq.jpg',
+            communication: './wangye/xc.jpg',
+            lighting: './wangye/zmd.jpg',
+            protection: './wangye/zys.jpg',
+            rescue: './wangye/mhq.png'
+          },
+          items: {}
+        };
+        initCategoryHandlers();
+      });
+
+    // 关闭模态框
+    document.getElementById('close-modal').addEventListener('click', function() {
+      document.getElementById('item-modal').classList.add('hidden');
+    });
+
+    // 点击模态框外部关闭
+    document.getElementById('item-modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.add('hidden');
+      }
+    });
+
+    // 日历生成
+    const calendarDays = document.getElementById('calendar-days');
+    const currentMonthEl = document.getElementById('current-month');
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+    
+    // 检查记录数据
+    const inspectionRecords = {
+      '2023-06-05': true,
+      '2023-06-10': true,
+      '2023-06-15': false,
+      '2023-06-20': true,
+    };
+    
+    function generateCalendar(month, year) {
+      calendarDays.innerHTML = '';
+      currentMonthEl.textContent = `${year}年${month + 1}月`;
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      // 添加上个月的占位天数
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.classList.add('text-center', 'py-2', 'text-gray-300');
+        calendarDays.appendChild(emptyDay);
+      }
+      
+      // 添加当月天数
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        const isToday = dateString === currentDate.toISOString().split('T')[0];
+        const isPast = new Date(dateString) < currentDate;
+        const hasRecord = inspectionRecords[dateString] !== undefined;
+        const isPassed = inspectionRecords[dateString] === true;
+        
+        dayElement.classList.add('calendar-day', 'flex', 'items-center', 'justify-center', 'rounded-md', 'cursor-pointer');
+        
+        if (isToday) {
+          dayElement.classList.add('bg-primary/10', 'font-bold', 'border', 'border-primary');
+        } else if (hasRecord) {
+          // 有检查记录 — 绿色
+          dayElement.classList.add('bg-green-100', 'text-green-700');
+        } else if (new Date(dateString) < currentDate) {
+          // 已经过但无记录 — 红色
+          dayElement.classList.add('bg-red-100', 'text-red-700');
+        } else {
+          // 未检查（未来或当日且无记录） — 白色/默认
+          dayElement.classList.add('bg-white');
+        }
+        
+        dayElement.textContent = i;
+        dayElement.dataset.date = dateString;
+        
+        dayElement.addEventListener('click', function() {
+          document.getElementById('inspection-date').value = dateString;
+        });
+        
+        calendarDays.appendChild(dayElement);
+      }
+    }
+    
+    generateCalendar(currentMonth, currentYear);
+    
+    // 隐藏翻月按钮，日期保持与现实时间一致（不可手动选择）
+    document.getElementById('prev-month').style.display = 'none';
+    document.getElementById('next-month').style.display = 'none';
+
+    // 将所有 date 输入设为今日并设为只读/disabled
+    function setTodayToDateInputs() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      document.querySelectorAll('input[type="date"]').forEach(inp => {
+        inp.value = iso;
+        inp.setAttribute('readonly', 'true');
+        inp.removeAttribute('disabled');
+      });
+    }
+
+    setTodayToDateInputs();
+
+    // 添加使用物资行
+    function populateItemsForCategory(catKey, selectEl) {
+      selectEl.innerHTML = '<option value="">请选择物资</option>';
+      const cat = 物资Data[catKey];
+      if (cat && cat.items) {
+        cat.items.forEach(it => {
+          const opt = document.createElement('option');
+          opt.value = it.id;
+          opt.textContent = it.name;
+          selectEl.appendChild(opt);
+        });
+        selectEl.disabled = false;
+        return;
+      }
+      // 如果没有物资则保持禁用
+      selectEl.disabled = true;
+    }
+
+    // bind initial category -> item behavior for usage rows
+    function bindUsageRow(row) {
+      const cat = row.querySelector('.usage-category');
+      const item = row.querySelector('.usage-item');
+      cat.addEventListener('change', function() {
+        populateItemsForCategory(this.value, item);
+      });
+    }
+
+    // initial bind for existing row
+    document.querySelectorAll('#usage-items tr').forEach(r => bindUsageRow(r));
+
+    document.querySelector('.add-item').addEventListener('click', function() {
+      const tbody = document.getElementById('usage-items');
+      const lastRow = tbody.lastElementChild;
+      const newRow = lastRow.cloneNode(true);
+      newRow.querySelector('.usage-category').value = '';
+      const newUsageItem = newRow.querySelector('.usage-item');
+      newUsageItem.innerHTML = '<option value="">请先选择类别</option>';
+      newUsageItem.disabled = true;
+      newUsageItem.required = true;
+      newRow.querySelector('.usage-category').required = true;
+      const qty = newRow.querySelector('.usage-quantity');
+      if (qty) qty.required = true;
+      newRow.querySelector('.usage-specification').textContent = '-';
+      newRow.querySelector('.usage-quantity').value = 1;
+      tbody.appendChild(newRow);
+      bindUsageRow(newRow);
+    });
+
+    // 添加归还物资行
+    function bindReturnRow(row) {
+      const cat = row.querySelector('.return-category');
+      const item = row.querySelector('.return-item');
+      cat.addEventListener('change', function() {
+        populateItemsForCategory(this.value, item);
+      });
+    }
+
+    document.querySelectorAll('#return-items tr').forEach(r => bindReturnRow(r));
+
+    document.querySelector('.add-return-item').addEventListener('click', function() {
+      const tbody = document.getElementById('return-items');
+      const lastRow = tbody.lastElementChild;
+      const newRow = lastRow.cloneNode(true);
+      newRow.querySelector('.return-category').value = '';
+      const newReturnItem = newRow.querySelector('.return-item');
+      newReturnItem.innerHTML = '<option value="">请先选择类别</option>';
+      newReturnItem.disabled = true;
+      newReturnItem.required = true;
+      newRow.querySelector('.return-category').required = true;
+      const rqty = newRow.querySelector('.return-quantity');
+      if (rqty) rqty.required = true;
+      newRow.querySelector('.return-specification').textContent = '-';
+      newRow.querySelector('.return-quantity').value = 1;
+  const newStatus = newRow.querySelector('.return-status');
+  if (newStatus) newStatus.required = true;
+      tbody.appendChild(newRow);
+      bindReturnRow(newRow);
+    });
+
+    // 表单提交：先运行 HTML5 验证（reportValidity），未通过则阻止提交并显示提示
+    // localStorage helpers
+    function saveToLocal(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+      } catch (err) {
+        console.error('保存到 localStorage 失败', err);
+        return false;
+      }
+    }
+
+    function loadFromLocal(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (err) {
+        console.error('从 localStorage 读取失败', err);
+        return null;
+      }
+    }
+
+    // 高亮无效字段（添加/移除错误样式）
+    function updateFieldValidationStyles(form) {
+      Array.from(form.elements).forEach(el => {
+        if (el.willValidate) {
+          if (!el.checkValidity()) {
+            el.classList.add('ring', 'ring-red-300');
+          } else {
+            el.classList.remove('ring', 'ring-red-300');
+          }
+        }
+      });
+    }
+
+    // 根据表单有效性启用/禁用提交按钮
+    function updateSubmitState(form) {
+      const submit = form.querySelector('button[type="submit"]');
+      if (!submit) return;
+      const valid = form.checkValidity();
+      submit.disabled = !valid;
+      if (submit.disabled) {
+        submit.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        submit.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    // 为表单绑定实时验证（输入时刷新高亮和提交状态）
+    function bindFormValidation(form) {
+      // 初次检查
+      updateFieldValidationStyles(form);
+      updateSubmitState(form);
+
+      form.addEventListener('input', function() {
+        updateFieldValidationStyles(form);
+        updateSubmitState(form);
+      }, { capture: true });
+
+      form.addEventListener('change', function() {
+        updateFieldValidationStyles(form);
+        updateSubmitState(form);
+      }, { capture: true });
+    }
+
+    // 抽象化保存逻辑：根据表单 id 存储为 localStorage keys
+    function handleFormSubmit(form, storageKey, gatherDataFn) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateFieldValidationStyles(form);
+        if (!form.reportValidity()) {
+          updateSubmitState(form);
+          return;
+        }
+        const data = gatherDataFn();
+        const ok = saveToLocal(storageKey, data);
+        if (ok) {
+          // 视觉反馈：暂时保留 alert
+          alert('数据已保存到本地存储（localStorage）！');
+          // 禁用按钮短暂提示
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn) {
+            btn.textContent = '已保存';
+            setTimeout(() => { btn.textContent = btn.dataset.originalText || '提交'; updateSubmitState(form); }, 1200);
+          }
+        }
+      });
+    }
+
+    // 为所有已存在的表单绑定验证与保存
+    document.querySelectorAll('form').forEach(form => {
+      // 记录 submit 文本
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn && !btn.dataset.originalText) btn.dataset.originalText = btn.textContent.trim();
+      bindFormValidation(form);
+    });
+
+    // 根据具体表单收集数据的实现
+    // 检查表单
+    const inspectionForm = document.getElementById('inspection-form');
+    if (inspectionForm) {
+      handleFormSubmit(inspectionForm, 'inspection_records', function() {
+        return {
+          date: document.getElementById('inspection-date').value,
+          inspector: document.getElementById('inspector').value,
+          category: document.getElementById('inspection-category').value,
+          item: document.getElementById('inspection-item').value,
+          result: inspectionForm.querySelector('input[name="inspection-result"]:checked') ? inspectionForm.querySelector('input[name="inspection-result"]:checked').value : null,
+          notes: document.getElementById('inspection-notes').value,
+          // 不保存 file 对象到 localStorage（只能保存文件名或 base64，如需可扩展）
+          photoName: document.getElementById('inspection-photo').files[0] ? document.getElementById('inspection-photo').files[0].name : null,
+          savedAt: new Date().toISOString()
+        };
+      });
+    }
+
+    // 使用登记表单（申请）
+    const usageForm = document.querySelector('#usage-form form') || document.querySelector('#usage-form form');
+    if (usageForm) {
+      handleFormSubmit(usageForm, 'usage_applications', function() {
+        const rows = [];
+        document.querySelectorAll('#usage-items tr').forEach(r => {
+          const cat = r.querySelector('.usage-category');
+          const item = r.querySelector('.usage-item');
+          const qty = r.querySelector('.usage-quantity');
+          if (cat && item && qty) {
+            rows.push({ category: cat.value, item: item.value, quantity: qty.value });
+          }
+        });
+        return {
+          date: usageForm.querySelector('input[type="date"]').value,
+          unit: usageForm.querySelector('.usage-unit').value,
+          user: usageForm.querySelector('input[type="text"]').value,
+          phone: usageForm.querySelector('input[type="tel"]').value,
+          reason: usageForm.querySelector('textarea').value,
+          items: rows,
+          savedAt: new Date().toISOString()
+        };
+      });
+    }
+
+    // 归还登记表单
+    const returnForm = document.querySelector('#return-form form');
+    if (returnForm) {
+      handleFormSubmit(returnForm, 'return_records', function() {
+        const rows = [];
+        document.querySelectorAll('#return-items tr').forEach(r => {
+          const cat = r.querySelector('.return-category');
+          const item = r.querySelector('.return-item');
+          const qty = r.querySelector('.return-quantity');
+          const status = r.querySelector('.return-status');
+          if (cat && item && qty && status) {
+            rows.push({ category: cat.value, item: item.value, quantity: qty.value, status: status.value });
+          }
+        });
+        return {
+          date: returnForm.querySelector('input[type="date"]').value,
+          user: returnForm.querySelector('input[type="text"]').value,
+          remarks: returnForm.querySelector('textarea').value,
+          items: rows,
+          savedAt: new Date().toISOString()
+        };
+      });
+    }
+
+    // 在克隆行后确保其校验和提交按钮状态被正确处理
+    function normalizeClonedRowValidations(containerSelector) {
+      const container = document.querySelector(containerSelector);
+      if (!container) return;
+      container.querySelectorAll('tr').forEach(r => {
+        // ensure required attributes are present (they are set elsewhere when cloning)
+        Array.from(r.querySelectorAll('select, input, textarea')).forEach(el => {
+          // attach input/change listeners so validation highlighting updates
+          el.addEventListener('input', function() {
+            const form = el.closest('form'); if (form) { updateFieldValidationStyles(form); updateSubmitState(form); }
+          });
+          el.addEventListener('change', function() {
+            const form = el.closest('form'); if (form) { updateFieldValidationStyles(form); updateSubmitState(form); }
+          });
+        });
+      });
+    }
+
+    // 在新增行后调用 normalize
+    const originalAddItem = document.querySelector('.add-item');
+    if (originalAddItem) {
+      originalAddItem.addEventListener('click', function() {
+        setTimeout(() => { normalizeClonedRowValidations('#usage-items'); }, 50);
+      });
+    }
+    const originalAddReturn = document.querySelector('.add-return-item');
+    if (originalAddReturn) {
+      originalAddReturn.addEventListener('click', function() {
+        setTimeout(() => { normalizeClonedRowValidations('#return-items'); }, 50);
+      });
+    }
+
+    // 初始化图表
+    window.addEventListener('load', function() {
+      // 物资类别统计
+      const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+      new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(物资Data).map(key => 物资Data[key].name),
+          datasets: [{
+            label: '物资数量',
+            data: Object.keys(物资Data).map(key => 物资Data[key].items.length),
+            backgroundColor: 'rgba(22, 93, 255, 0.7)',
+            borderColor: 'rgba(22, 93, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: '各类物资数量统计' }
+          }
+        }
+      });
+      
+      // 物资状态统计 图表已移除（首页不再显示状态饼图）
+    });
+  </script>
+</body>
+</html>
