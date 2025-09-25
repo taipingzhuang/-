@@ -1,0 +1,15 @@
+{
+  "categories": {
+    "fire": "./wangye/xfsd.jpg",
+    "medical": "./wangye/jsy.jpg",
+    "flood": "./wangye/fxsd.jpg",
+    "tools": "./wangye/kyq.jpg",
+    "communication": "./wangye/xc.jpg",
+    "lighting": "./wangye/zmd.jpg",
+    "protection": "./wangye/zys.jpg",
+    "rescue": "./wangye/mhq.png"
+  },
+  "items": {
+    
+  }
+}
